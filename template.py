@@ -34,6 +34,9 @@ template ="""
     <ul>
         <li><a href='/'>На главную</a></li>
         <li><a href='#botom'>Добавить запись</a></li>
+        %for parent in data['parent']:
+            <a href='/?parent={{parent}}'> {{parent}}</a>
+        %end
     </ul>
     </div>
     <h1> Table </h1>
@@ -46,7 +49,7 @@ template ="""
             <td><a href='/?ordering=pictures'>Сделан ли чертеж</a></td>
             <td><a href='/?ordering=parent'>Вхождение</a></td>
         </tr>
-        %for row in data:
+        %for row in data['data']:
             <tr>
                 <td><a href='item/{{row[5]}}'>{{row[0]}}</a></td>
                 <td>{{row[1]}}</td>

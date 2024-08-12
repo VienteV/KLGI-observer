@@ -1,4 +1,4 @@
-from bottle import Bottle, template, run, route, request, redirect
+from bottle import Bottle, template, run, route, request, redirect, patch
 from template import template as t
 from template import template_klgi
 import sqlite3
@@ -8,6 +8,10 @@ cur = conn.cursor()
 
 def go_main():
     return redirect('/')
+def tags():
+    cur.execute("""SELECT DISTINCT(parent)  FROM BV ORDER BY parent""")
+    parent = list(map(lambda a: a[0], cur.fetchall()))
+    return parent
 
 @route('/')
 def index():
@@ -15,11 +19,21 @@ def index():
         ordering = request.query.ordering
     else:
         ordering ='klgi'
-    cur.execute(f"""SELECT klgi, name, amount,
+    if request.query.parent:
+        parent = request.query.parent
+        print(parent)
+        cur.execute(f"""SELECT klgi, name, amount,
+        CASE WHEN pictures = 1 THEN "Сделан" ELSE "Нету" END AS new_pic, parent, id
+        FROM BV
+        WHERE parent = '{parent}'
+        ORDER BY {ordering}""")
+    else:
+        cur.execute(f"""SELECT klgi, name, amount,
 CASE WHEN pictures = 1 THEN "Сделан" ELSE "Нету" END AS new_pic, parent, id
 FROM BV
 ORDER BY {ordering}""")
     data = cur.fetchall()
+    data = {'data':data, 'parent': tags()}
     return template(t, data=data)
 
 @route('/', method='POST')
